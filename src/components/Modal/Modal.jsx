@@ -1,47 +1,40 @@
-import { Component } from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import style from './Modal.module.css';
 
-export default class Modal extends Component {
-  static propTypes = {
-    closeModal: PropTypes.func.isRequired,
-    lgImage: PropTypes.string.isRequired,
-    tags: PropTypes.string.isRequired,
-  };
+const Modal = ({ lgImage, tags, closeModal }) => {
+  useEffect(() => {
+    const handleKeyDown = event => {
+      if (event.code === 'Escape') {
+        closeModal();
+      }
+    };
 
-  // Монтування компонену по кліку
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
-  }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [closeModal]);
 
-  // Розмонування компоненту по кліку
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
-  }
-
-  // Слухає клік на клавішу Escape і закриває модалку
-  handleKeyDown = element => {
-    if (element.code === 'Escape') {
-      this.props.closeModal();
-    }
-  };
-
-  // Відстеження кліку по Backdrop, та у разі наявності закриття модалки
-  handleBackdropClick = event => {
+  const handleBackdropClick = event => {
     if (event.currentTarget === event.target) {
-      this.props.closeModal();
+      closeModal();
     }
   };
 
-  // Виведення модалки з Overlay
-  render() {
-    const { lgImage, tags } = this.props;
-    return (
-      <div className={style.Overlay} onClick={this.handleBackdropClick}>
-        <div className={style.Modal}>
-          <img src={lgImage} alt={tags} />
-        </div>
+  return (
+    <div className={style.Overlay} onClick={handleBackdropClick}>
+      <div className={style.Modal}>
+        <img src={lgImage} alt={tags} />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+Modal.propTypes = {
+  closeModal: PropTypes.func.isRequired,
+  lgImage: PropTypes.string.isRequired,
+  tags: PropTypes.string.isRequired,
+};
+
+export default Modal;
